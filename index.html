@@ -89,11 +89,8 @@ body.sidebar-off #sidebar-toggle{left:0}
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── TOPBAR ── */
-#topbar{height:52px;background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;flex-shrink:0;z-index:50;backdrop-filter:blur(20px);
-  position:relative}
-.ticker{position:absolute;top:0;left:0;right:0;height:100%;overflow:hidden;pointer-events:none;display:none}
+#topbar{height:52px;background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:50;backdrop-filter:blur(20px)}
+.ticker{position:relative;width:100%;height:24px;overflow:hidden;pointer-events:none;display:none;background:rgba(229,9,20,.06);border-bottom:1px solid var(--border2);flex-shrink:0}
 .ticker.on{display:flex;align-items:center}
 #topbar.with-ticker{padding-top:20px}
 .ticker-badge{position:absolute;left:0;top:0;bottom:0;background:var(--accent);
@@ -570,15 +567,15 @@ body.sidebar-off #sidebar-toggle{left:0}
 <!-- ── MAIN ── -->
 <div id="main">
 
-  <!-- TOPBAR -->
-  <div id="topbar">
-    <!-- Ticker (behind content, shown via js) -->
-    <div class="ticker" id="ticker">
-      <div class="ticker-badge">📰 DUVI TRENDS</div>
-      <div class="ticker-scroll" id="ticker-scroll"></div>
-    </div>
+<!-- TICKER — banda independiente encima del topbar -->
+<div class="ticker" id="ticker">
+  <div class="ticker-badge">📰 DUVI TRENDS</div>
+  <div class="ticker-scroll" id="ticker-scroll"></div>
+</div>
 
-    <div class="topbar-left">
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-left">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" id="search-inp" placeholder="Buscar por título, género, autor..." oninput="handleSearch()">
