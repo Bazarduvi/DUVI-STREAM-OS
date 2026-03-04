@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Duvi Stream OS — Tu plataforma de video personal con IA">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<title>DUVI STREAM OS · v3.4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#e50914;--accent-glow:rgba(229,9,20,0.35);
+  --bg:#000;--bg2:#0a0a0a;--bg3:#111;--bg4:rgba(18,18,18,0.9);
+  --text:#fff;--text2:#a1a1aa;--text3:#52525b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(229,9,20,0.3);
+  --fn:'Bebas Neue',sans-serif;--fu:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+  --sidebar:260px;
+}
+[data-theme="prime-blue"]{--accent:#00bfff;--accent-glow:rgba(0,191,255,0.3);--border2:rgba(0,191,255,0.3)}
+[data-theme="hbo-purple"]{--accent:#8b5cf6;--accent-glow:rgba(139,92,246,0.3);--border2:rgba(139,92,246,0.3)}
+[data-theme="spotify-green"]{--accent:#1db954;--accent-glow:rgba(29,185,84,0.3);--border2:rgba(29,185,84,0.3)}
+[data-theme="cinema-white"]{--accent:#e0e0e0;--accent-glow:rgba(220,220,220,0.15);--bg:#f4f4f5;--bg2:#e4e4e7;--bg3:#d4d4d8;--text:#18181b;--text2:#3f3f46;--text3:#a1a1aa;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.2)}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--fu);transition:background .4s,color .4s}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:radial-gradient(ellipse at 0% 0%,rgba(229,9,20,.04) 0,transparent 50%)}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+#sidebar{width:var(--sidebar);background:var(--bg);border-right:1px solid var(--border);
+  flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;
+  transition:width .4s ease,transform .4s ease;z-index:60;position:relative}
+#sidebar.collapsed{width:0;overflow:hidden}
+.sidebar-logo{padding:28px 20px 16px;flex-shrink:0}
+.logo-wrap{display:flex;align-items:center;gap:12px;cursor:pointer}
+.logo-icon{width:52px;height:52px;position:relative;flex-shrink:0}
+.logo-icon-bg{position:absolute;inset:0;background:linear-gradient(135deg,#e50914,#7f0007);
+  border-radius:14px;transform:rotate(-6deg);transition:transform .4s}
+.logo-wrap:hover .logo-icon-bg{transform:rotate(0deg) scale(1.08)}
+.logo-icon-border{position:absolute;inset:4px;border:1px dashed rgba(255,255,255,.25);
+  border-radius:10px;animation:spin 12s linear infinite}
+.logo-d{position:relative;z-index:2;color:#fff;font-family:var(--fn);
+  font-size:1.8rem;line-height:1;display:flex;align-items:center;justify-content:center;height:100%}
+.logo-spark{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;
+  background:#fff;border-radius:50%;border:2px solid var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:9px;z-index:3}
+.logo-text{flex:1}
+.logo-title{font-family:var(--fn);font-size:1.6rem;letter-spacing:.05em;line-height:1;display:flex;align-items:center;gap:4px}
+.logo-stream{background:var(--accent);color:#000;padding:1px 5px;font-size:1.5rem;
+  font-style:normal;transform:skewX(-8deg);display:inline-block}
+.logo-sub{font-family:var(--fm);font-size:.52rem;letter-spacing:4px;text-transform:uppercase;
+  color:var(--text3);margin-top:3px}
+.sidebar-nav{padding:8px 12px;flex:1}
+.nav-section{font-family:var(--fm);font-size:.5rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text3);padding:14px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;
+  cursor:pointer;transition:all .2s;font-size:.88rem;color:var(--text2);margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-item.active{background:rgba(255,255,255,.08);color:#fff;font-weight:600}
+.nav-item .nav-icon{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px var(--accent))}
+.sidebar-bottom{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+.sidebar-action{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-radius:12px;cursor:pointer;font-size:.82rem;color:var(--text2);
+  transition:all .2s;background:none;border:1px solid var(--border);width:100%;
+  margin-bottom:6px;font-family:var(--fu)}
+.sidebar-action:hover{border-color:var(--accent);color:var(--accent);background:rgba(229,9,20,.06)}
+.sidebar-action.primary{background:var(--accent);border-color:var(--accent);
+  color:#fff;font-weight:700}
+.sidebar-action.primary:hover{background:#c0000f}
+
+/* ── SIDEBAR TOGGLE ── */
+#sidebar-toggle{position:fixed;top:50%;transform:translateY(-50%);
+  z-index:65;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text2);padding:8px 7px;border-radius:0 10px 10px 0;
+  cursor:pointer;transition:all .3s;font-size:.9rem;left:var(--sidebar)}
+#sidebar.collapsed~#sidebar-toggle,
+body.sidebar-off #sidebar-toggle{left:0}
+#sidebar-toggle:hover{background:var(--accent);color:#fff}
+
+/* ── MAIN ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+#topbar{height:52px;background:rgba(0,0,0,.96);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;flex-shrink:0;z-index:50;backdrop-filter:blur(20px);
+  position:relative}
+.ticker{position:absolute;top:0;left:0;right:0;height:100%;overflow:hidden;pointer-events:none;display:none}
+.ticker.on{display:flex;align-items:center}
+#topbar.with-ticker{padding-top:20px}
+.ticker-badge{position:absolute;left:0;top:0;bottom:0;background:var(--accent);
+  padding:0 10px;display:flex;align-items:center;gap:5px;z-index:2;
+  font-family:var(--fm);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.ticker-scroll{display:flex;gap:80px;animation:tickerMove 90s linear infinite;padding-left:180px;pointer-events:all}
+.ticker-scroll:hover{animation-play-state:paused}
+.ticker-item{white-space:nowrap;font-family:var(--fm);font-size:.58rem;
+  letter-spacing:1px;text-transform:uppercase;color:var(--text3);
+  display:flex;align-items:center;gap:8px;transition:color .2s;cursor:pointer}
+.ticker-item:hover{color:var(--accent)}
+.ticker-source{color:var(--accent);font-weight:700}
+@keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.topbar-left{display:flex;align-items:center;gap:12px}
+.search-wrap{position:relative}
+.search-wrap input{background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fu);font-size:.83rem;
+  padding:7px 14px 7px 34px;border-radius:20px;outline:none;width:300px;
+  transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--border2)}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);font-size:.85rem;pointer-events:none}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text2);padding:6px 12px;border-radius:10px;cursor:pointer;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:1px;text-transform:uppercase;
+  transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tb-btn.on{background:rgba(229,9,20,.15);border-color:var(--border2);color:var(--accent)}
+.tb-btn.edit.on{background:rgba(229,9,20,.2);color:var(--accent)}
+.notif-badge{display:inline-flex;align-items:center;justify-content:center;
+  min-width:16px;height:16px;background:var(--accent);border-radius:8px;
+  font-size:.5rem;font-weight:700;padding:0 3px;margin-left:2px}
+
+/* ── CONTENT AREA ── */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+#content::-webkit-scrollbar{width:4px}
+#content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── HERO / SLIDESHOW ── */
+#hero{height:60vh;min-height:380px;position:relative;overflow:hidden;flex-shrink:0}
+.hero-bg{position:absolute;inset:0;transition:opacity 1s ease}
+.hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.55;transition:transform 8s ease;transform:scale(1.05)}
+#hero:hover .hero-bg img{transform:scale(1.12)}
+.hero-grad{position:absolute;inset:0;background:linear-gradient(to top,#000 0%,transparent 50%,rgba(0,0,0,.3) 100%)}
+.hero-content{position:absolute;bottom:60px;left:40px;max-width:620px;z-index:2;animation:heroIn .8s ease}
+@keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-badge{font-family:var(--fm);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.hero-title{font-family:var(--fn);font-size:clamp(2.2rem,5vw,4rem);letter-spacing:.02em;
+  line-height:.95;margin-bottom:12px;text-shadow:0 4px 20px rgba(0,0,0,.8)}
+.hero-desc{font-size:.9rem;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:20px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-btns{display:flex;gap:12px}
+.hero-play{background:#fff;color:#000;border:none;font-weight:800;font-size:.9rem;
+  padding:12px 28px;border-radius:10px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:8px}
+.hero-play:hover{background:#e0e0e0;transform:scale(1.03)}
+.hero-dots{position:absolute;bottom:20px;left:40px;display:flex;gap:6px;z-index:3}
+.hero-dot{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.3);
+  cursor:pointer;transition:all .3s}
+.hero-dot.on{width:22px;background:var(--accent)}
+.hero-progress{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.1)}
+.hero-progress-bar{height:100%;background:var(--accent);transition:width 8s linear}
+.hero-arrows{position:absolute;right:24px;bottom:20px;display:flex;gap:6px;z-index:3}
+.hero-arrow{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.7);padding:8px 11px;border-radius:8px;cursor:pointer;
+  transition:all .2s;font-size:.9rem}
+.hero-arrow:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ── VIDEO ROWS ── */
+.video-section{padding:0 24px 32px}
+.section-head{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 14px}
+.section-title{font-family:var(--fn);font-size:1.5rem;letter-spacing:.05em}
+.section-count{font-family:var(--fm);font-size:.55rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);margin-left:8px}
+.scroll-row-wrap{position:relative}
+.scroll-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth}
+.scroll-row::-webkit-scrollbar{height:3px}
+.scroll-row::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.scroll-arrow{position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.8);padding:14px 10px;border-radius:8px;cursor:pointer;
+  z-index:10;transition:all .2s;font-size:1rem}
+.scroll-arrow:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.scroll-arrow.left{left:-8px}
+.scroll-arrow.right{right:-8px}
+
+/* ── VIDEO CARD ── */
+.vcard{width:200px;flex-shrink:0;cursor:pointer;border-radius:12px;overflow:hidden;
+  background:var(--bg3);transition:all .25s;position:relative;border:1px solid transparent}
+.vcard:hover{transform:scale(1.05);border-color:var(--border2);
+  box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 20px var(--accent-glow)}
+.vcard.edit-mode{cursor:grab}
+.vcard.edit-mode:active{cursor:grabbing}
+.vcard-thumb{aspect-ratio:16/9;overflow:hidden;position:relative}
+.vcard-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.vcard:hover .vcard-thumb img{transform:scale(1.1)}
+.vcard-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);
+  display:flex;align-items:center;justify-content:center;transition:background .2s}
+.vcard:hover .vcard-overlay{background:rgba(0,0,0,.4)}
+.vcard-play{background:rgba(255,255,255,.95);color:#000;border:none;
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;transform:scale(0);transition:transform .2s;cursor:pointer;padding-left:3px}
+.vcard:hover .vcard-play{transform:scale(1)}
+.vcard-pinned{position:absolute;top:6px;left:6px;background:var(--accent);
+  color:#fff;font-family:var(--fm);font-size:.48rem;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 6px;border-radius:4px}
+.vcard-fav{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);
+  border:none;color:rgba(255,255,255,.5);padding:5px;border-radius:6px;
+  cursor:pointer;font-size:.9rem;transition:all .2s}
+.vcard-fav.on{color:#e50914}
+.vcard-fav:hover{color:#fff}
+.vcard-info{padding:10px 12px}
+.vcard-title{font-size:.82rem;font-weight:600;line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+.vcard-cat{font-family:var(--fm);font-size:.52rem;letter-spacing:1px;text-transform:uppercase;
+  color:var(--accent)}
+.vcard-actions{display:flex;gap:4px;padding:0 8px 8px;opacity:0;transition:opacity .2s}
+.vcard:hover .vcard-actions{opacity:1}
+.vcard-action-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--text2);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:.6rem;
+  transition:all .2s;display:flex;align-items:center;gap:3px;font-family:var(--fm)}
+.vcard-action-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── FOLDER ── */
+.folder-card{width:160px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);
+  border-radius:14px;padding:16px;cursor:pointer;transition:all .25s;
+  display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.folder-card:hover{border-color:var(--border2);transform:scale(1.04)}
+.folder-card.drop-target{border-color:var(--accent);background:rgba(229,9,20,.08)}
+.folder-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:1.5rem}
+.folder-name{font-size:.78rem;font-weight:600;line-height:1.2}
+.folder-count{font-family:var(--fm);font-size:.52rem;letter-spacing:1px;color:var(--text3)}
+
+/* ── PLAYER ── */
+#player-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.97);flex-direction:column;animation:pgIn .2s ease}
+#player-overlay.on{display:flex}
+@keyframes pgIn{from{opacity:0}to{opacity:1}}
+.player-topbar{height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.player-title{font-family:var(--fn);font-size:1.4rem;letter-spacing:.03em;flex:1}
+.player-meta{font-family:var(--fm);font-size:.58rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--accent);margin-top:2px}
+.player-actions{display:flex;gap:8px}
+.player-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .2s;
+  font-size:.8rem;display:flex;align-items:center;gap:6px}
+.player-btn:hover{background:rgba(255,255,255,.12)}
+.player-btn.close-btn{background:rgba(229,9,20,.15);border-color:rgba(229,9,20,.4);color:var(--accent)}
+.player-btn.close-btn:hover{background:var(--accent);color:#fff}
+.player-frame{flex:1;position:relative;background:#000}
+.player-frame iframe{width:100%;height:100%;border:none}
+.player-error{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:16px;text-align:center;padding:40px}
+.player-error-icon{font-size:3rem;margin-bottom:8px}
+.player-error-title{font-family:var(--fn);font-size:1.8rem}
+.player-error-msg{color:var(--text2);font-size:.85rem;max-width:500px;line-height:1.6}
+.player-open-ext{display:flex;align-items:center;gap:8px;background:var(--accent);
+  border:none;color:#fff;padding:12px 24px;border-radius:10px;cursor:pointer;
+  font-weight:700;font-size:.85rem;transition:all .2s;margin-top:8px}
+.player-open-ext:hover{background:#c0000f}
+
+/* ── CONCIERGE (Floating Chat) ── */
+#concierge-fab{position:fixed;bottom:24px;right:24px;z-index:150;
+  width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#7f0007);
+  border:none;border-radius:50%;color:#fff;font-size:1.4rem;cursor:pointer;
+  box-shadow:0 8px 28px var(--accent-glow);transition:all .25s;
+  display:flex;align-items:center;justify-content:center}
+#concierge-fab:hover{transform:scale(1.1);box-shadow:0 12px 36px var(--accent-glow)}
+#concierge-fab.open{background:rgba(20,20,20,.98);border:1px solid var(--border2)}
+#concierge-panel{position:fixed;bottom:90px;right:24px;z-index:149;
+  width:380px;height:520px;background:rgba(5,5,5,.98);border:1px solid var(--border2);
+  border-radius:20px;display:none;flex-direction:column;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.7);backdrop-filter:blur(20px);
+  animation:slideUp .25s ease}
+#concierge-panel.on{display:flex}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.conc-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.conc-head-info{display:flex;align-items:center;gap:10px}
+.conc-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#7f0007);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.conc-name{font-family:var(--fn);font-size:1rem;letter-spacing:.05em}
+.conc-status{font-family:var(--fm);font-size:.52rem;letter-spacing:1px;text-transform:uppercase;color:#22c55e}
+.conc-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;transition:color .2s}
+.conc-close:hover{color:var(--text)}
+.conc-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.conc-msgs::-webkit-scrollbar{width:2px}
+.conc-msgs::-webkit-scrollbar-thumb{background:var(--border2)}
+.conc-msg{max-width:90%;padding:10px 13px;border-radius:14px;font-size:.82rem;
+  line-height:1.5;animation:pgIn .15s ease}
+.conc-msg.bot{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);white-space:pre-wrap}
+.conc-msg.user{align-self:flex-end;background:var(--accent);color:#fff}
+.conc-msg.sys{align-self:center;font-family:var(--fm);font-size:.52rem;letter-spacing:1px;
+  color:var(--text3);text-transform:uppercase;padding:3px 10px;
+  border:1px dashed var(--border);border-radius:20px}
+.conc-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px;flex-shrink:0}
+.conc-sugg{background:rgba(229,9,20,.1);border:1px solid var(--border2);
+  color:var(--accent);font-family:var(--fm);font-size:.56rem;letter-spacing:.5px;
+  padding:5px 10px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.conc-sugg:hover{background:var(--accent);color:#fff}
+.conc-inp-row{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.conc-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fu);font-size:.82rem;
+  padding:8px 12px;border-radius:10px;outline:none;resize:none;min-height:36px}
+.conc-inp:focus{border-color:var(--border2)}
+.conc-send{background:var(--accent);border:none;color:#fff;padding:8px 13px;
+  border-radius:10px;cursor:pointer;transition:all .2s;font-size:.85rem}
+.conc-send:hover{background:#c0000f}
+.conc-video-result{background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;
+  margin-top:5px;cursor:pointer;transition:all .2s}
+.conc-video-result:hover{border-color:var(--border2)}
+.conc-video-thumb{width:56px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg3)}
+.conc-video-info{flex:1;min-width:0}
+.conc-video-title{font-size:.72rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conc-video-cat{font-family:var(--fm);font-size:.5rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.conc-add-btn{background:var(--accent);border:none;color:#fff;font-size:.55rem;
+  font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;
+  padding:4px 8px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.conc-add-btn:hover{background:#c0000f}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.9);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;width:100%;max-width:520px;overflow:hidden;
+  animation:pgIn .2s ease;box-shadow:0 40px 80px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;max-height:90vh}
+.modal.wide{max-width:700px}
+.modal-head{background:var(--accent);padding:22px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-family:var(--fn);font-size:1.4rem;letter-spacing:.04em;color:#fff}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:1.2rem;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-body{padding:24px;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:3px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2)}
+
+/* Settings tabs */
+.stab-row{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.stab{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text2);font-family:var(--fm);font-size:.58rem;letter-spacing:1px;
+  text-transform:uppercase;padding:7px 14px;border-radius:20px;cursor:pointer;transition:all .2s}
+.stab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.stab:hover:not(.on){border-color:var(--accent);color:var(--accent)}
+.settings-label{font-family:var(--fm);font-size:.55rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:block}
+.settings-section{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:14px;padding:18px;margin-bottom:14px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toggle-label{font-size:.85rem;font-weight:500}
+.toggle{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle.off{background:rgba(255,255,255,.1)}
+.toggle::after{content:'';position:absolute;top:3px;width:18px;height:18px;
+  background:#fff;border-radius:50%;transition:left .2s}
+.toggle.on::after{left:23px}
+.toggle.off::after{left:3px}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0}
+.theme-item{border:1px solid var(--border);border-radius:10px;padding:10px;
+  cursor:pointer;transition:all .2s;text-align:center;display:flex;align-items:center;gap:8px}
+.theme-item.on{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
+.theme-item:hover:not(.on){border-color:rgba(255,255,255,.2)}
+.theme-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.theme-name{font-family:var(--fm);font-size:.56rem;letter-spacing:1px;text-transform:uppercase}
+.sound-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.sound-btn{padding:8px;border:1px solid var(--border);border-radius:8px;
+  background:none;color:var(--text2);font-family:var(--fm);font-size:.58rem;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.sound-btn.on{background:rgba(229,9,20,.15);border-color:var(--border2);color:var(--accent)}
+.sound-btn:hover:not(.on){border-color:var(--accent)}
+
+/* ── API DETECTOR ── */
+.api-detector{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);
+  border-radius:12px;padding:12px 16px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 8px #22c55e;animation:blink 2s infinite}
+.api-dot.off{background:var(--text3);box-shadow:none;animation:none}
+.api-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.api-sel{background:rgba(0,0,0,.4);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fm);font-size:.62rem;
+  padding:6px 8px;border-radius:8px;outline:none}
+.api-inp{background:rgba(0,0,0,.4);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fm);font-size:.62rem;
+  padding:6px 10px;border-radius:8px;outline:none;width:220px}
+.api-inp:focus{border-color:var(--border2)}
+.api-save{background:var(--accent);border:none;color:#fff;
+  font-family:var(--fm);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 12px;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.api-save:hover{background:#c0000f}
+
+/* ── CREDITS BAR ── */
+.credits-strip{background:rgba(229,9,20,.06);border:1px solid var(--border2);
+  border-radius:10px;padding:9px 14px;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;font-family:var(--fm);
+  font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+.credits-track{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.credits-fill{height:100%;background:linear-gradient(90deg,var(--accent),#ff6b6b);
+  border-radius:2px;transition:width .5s}
+.credits-count{color:var(--accent);font-weight:700}
+.coffee-link{color:var(--text3);cursor:pointer;transition:color .2s;font-size:.9rem;flex-shrink:0}
+.coffee-link:hover{color:var(--accent)}
+
+/* ── CREDITS MODAL ── */
+.coffee-btn{display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:14px;background:#ffc439;border:none;border-radius:12px;
+  color:#003087;font-weight:800;font-size:.9rem;text-transform:uppercase;
+  letter-spacing:1px;cursor:pointer;transition:all .2s;text-decoration:none;margin-bottom:10px}
+.coffee-btn:hover{background:#f2ba36;transform:scale(1.01)}
+.credits-author{font-family:var(--fn);font-size:1.4rem;letter-spacing:.03em;margin-bottom:4px}
+.credits-linkedin{display:inline-flex;align-items:center;gap:6px;
+  color:var(--accent);font-size:.8rem;text-decoration:none;
+  padding:8px 16px;border:1px solid var(--border2);border-radius:10px;
+  transition:all .2s;margin-bottom:16px}
+.credits-linkedin:hover{background:rgba(229,9,20,.08)}
+.credits-ai-badge{display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:1px;text-transform:uppercase;
+  color:#22c55e;padding:5px 12px;background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.2);border-radius:8px;margin-bottom:16px}
+
+/* ── ADD MODAL ── */
+.tab-row{display:flex;gap:4px;margin-bottom:18px}
+.tab-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text2);font-family:var(--fm);font-size:.6rem;letter-spacing:1px;
+  text-transform:uppercase;padding:7px 14px;border-radius:20px;cursor:pointer;transition:all .2s}
+.tab-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.form-field{margin-bottom:12px}
+.form-label{font-family:var(--fm);font-size:.56rem;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text3);display:block;margin-bottom:5px}
+.form-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fu);font-size:.85rem;
+  padding:9px 12px;border-radius:10px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--border2)}
+.form-input::placeholder{color:var(--text3)}
+.form-select{width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);font-family:var(--fu);font-size:.85rem;
+  padding:9px 12px;border-radius:10px;outline:none}
+.form-submit{width:100%;background:var(--accent);border:none;color:#fff;
+  font-weight:700;font-size:.88rem;padding:12px;border-radius:10px;
+  cursor:pointer;transition:all .2s;margin-top:4px}
+.form-submit:hover{background:#c0000f}
+.ai-enrich-btn{width:100%;background:rgba(229,9,20,.1);border:1px solid var(--border2);
+  color:var(--accent);font-family:var(--fm);font-size:.6rem;letter-spacing:1px;
+  text-transform:uppercase;padding:8px;border-radius:8px;cursor:pointer;
+  transition:all .2s;margin-top:6px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px}
+.ai-enrich-btn:hover{background:rgba(229,9,20,.2)}
+
+/* ── LEGAL MODAL ── */
+.legal-text{font-size:.82rem;line-height:1.8;color:var(--text2)}
+.legal-head{font-family:var(--fn);font-size:1rem;letter-spacing:.03em;
+  color:var(--text);margin:14px 0 6px}
+.legal-foot{font-family:var(--fm);font-size:.56rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text3);margin-top:16px;padding:10px;border:1px dashed var(--border);
+  border-radius:8px;text-align:center}
+.legal-link{background:none;border:none;color:var(--text3);font-family:var(--fm);
+  font-size:.55rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:color .2s}
+.legal-link:hover{color:var(--accent)}
+
+/* ── PWA BANNER ── */
+#pwa-banner{display:none;position:fixed;bottom:24px;left:24px;z-index:400;
+  background:rgba(15,15,15,.98);border:1px solid var(--border2);
+  border-radius:16px;padding:14px 18px;max-width:310px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);animation:slideUp .3s ease}
+.pwa-title{font-family:var(--fn);font-size:1rem;letter-spacing:.03em;margin-bottom:3px}
+.pwa-sub{font-size:.75rem;color:var(--text2);margin-bottom:12px;line-height:1.4}
+.pwa-btns{display:flex;gap:8px}
+.pwa-install{flex:1;background:var(--accent);border:none;color:#fff;
+  font-family:var(--fm);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;
+  padding:8px;border-radius:8px;cursor:pointer;transition:all .2s}
+.pwa-install:hover{background:#c0000f}
+.pwa-dismiss{background:none;border:1px solid var(--border);color:var(--text3);
+  font-family:var(--fm);font-size:.6rem;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .2s}
+.pwa-dismiss:hover{color:var(--text)}
+
+/* ── NOTIF ── */
+.notif{position:fixed;top:60px;right:20px;z-index:500;
+  background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+  font-family:var(--fm);font-size:.65rem;letter-spacing:1px;
+  padding:9px 16px;border-radius:10px;
+  box-shadow:0 4px 16px var(--accent-glow);animation:slideRight .3s ease}
+@keyframes slideRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4}
+.empty-text{font-family:var(--fm);font-size:.65rem;letter-spacing:2px;text-transform:uppercase}
+
+/* ── NOTIF PAGE ── */
+.notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:14px;
+  padding:16px 20px;margin-bottom:8px;display:flex;align-items:start;gap:12px;transition:border-color .2s}
+.notif-item:hover{border-color:var(--border2)}
+.notif-title{font-weight:700;font-family:var(--fn);font-size:1rem;letter-spacing:.03em;color:var(--accent);margin-bottom:3px}
+.notif-msg{font-size:.82rem;color:var(--text2);line-height:1.5}
+.notif-time{font-family:var(--fm);font-size:.52rem;letter-spacing:1px;color:var(--text3);margin-top:4px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  :root{--sidebar:0px}
+  #sidebar{position:fixed;z-index:70;width:260px;transform:translateX(-100%)}
+  #sidebar.mobile-open{transform:translateX(0)}
+  #sidebar-toggle{left:0!important}
+  .hero-title{font-size:2rem}
+  .hero-content{bottom:40px;left:20px}
+  #concierge-panel{width:calc(100vw - 32px);right:16px}
+}
+@media print{
+  #sidebar,#topbar,#concierge-fab,#concierge-panel,#pwa-banner,.tb-btn,#player-overlay{display:none!important}
+}
+.no-scrollbar::-webkit-scrollbar{display:none}
+.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wrap" onclick="ntf('📺 Duvi Stream OS v3.4')">
+      <div class="logo-icon">
+        <div class="logo-icon-bg"></div>
+        <div class="logo-icon-border"></div>
+        <div class="logo-d">D</div>
+        <div class="logo-spark">✦</div>
+      </div>
+      <div class="logo-text">
+        <div class="logo-title">DUVI<span class="logo-stream">STREAM</span></div>
+        <div class="logo-sub">Agentic OS · v3.4</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Biblioteca</div>
+    <div class="nav-item active" onclick="setCategory('Inicio')"><span class="nav-icon">🏠</span>Inicio</div>
+    <div class="nav-item" onclick="setCategory('Películas')"><span class="nav-icon">🎬</span>Películas</div>
+    <div class="nav-item" onclick="setCategory('Series')"><span class="nav-icon">📺</span>Series</div>
+    <div class="nav-item" onclick="setCategory('Bíblico')"><span class="nav-icon" style="filter:drop-shadow(0 0 4px #f59e0b)">📖</span>Bíblico</div>
+    <div class="nav-item" onclick="setCategory('Documentales')"><span class="nav-icon">🎥</span>Documentales</div>
+    <div class="nav-item" onclick="setCategory('Reels')"><span class="nav-icon">⚡</span>Reels</div>
+    <div class="nav-item" onclick="setCategory('Cursos')"><span class="nav-icon" style="filter:drop-shadow(0 0 4px #22c55e)">🎓</span>Cursos</div>
+    <div class="nav-section">Personal</div>
+    <div class="nav-item" onclick="setCategory('Favoritos')"><span class="nav-icon">❤️</span>Favoritos</div>
+    <div class="nav-item" onclick="setCategory('Historial')"><span class="nav-icon" style="filter:drop-shadow(0 0 4px #60a5fa)">🕐</span>Historial</div>
+    <div class="nav-item" onclick="setCategory('Listas')"><span class="nav-icon" style="filter:drop-shadow(0 0 4px #a78bfa)">📋</span>Listas</div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" onclick="setCategory('Duvi Video')"><span class="nav-icon">🔵</span>Duvi Video</div>
+    <div class="nav-item" onclick="setCategory('Pruebas')"><span class="nav-icon" style="filter:drop-shadow(0 0 4px #facc15)">🧪</span>Pruebas</div>
+    <div class="nav-item" onclick="setCategory('Notificaciones')" id="nav-notif"><span class="nav-icon">🔔</span>Notificaciones <span id="notif-badge" class="notif-badge" style="display:none">0</span></div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="sidebar-action primary" onclick="openModal('add-modal')">＋ Añadir Contenido</button>
+    <button class="sidebar-action" onclick="exportData()">💾 Exportar Biblioteca</button>
+    <button class="sidebar-action" onclick="document.getElementById('import-file').click()">📂 Importar Backup</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+  </div>
+</aside>
+
+<!-- Sidebar toggle -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">‹</button>
+
+<!-- ── MAIN ── -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <!-- Ticker (behind content, shown via js) -->
+    <div class="ticker" id="ticker">
+      <div class="ticker-badge">📰 DUVI TRENDS</div>
+      <div class="ticker-scroll" id="ticker-scroll"></div>
+    </div>
+
+    <div class="topbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-inp" placeholder="Buscar por título, género, autor..." oninput="handleSearch()">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn edit" id="edit-btn" onclick="toggleEdit()" title="Modo edición">✏️ Editar</button>
+      <button class="tb-btn" onclick="openModal('add-modal')" title="Añadir">＋ Añadir</button>
+      <button class="tb-btn" id="dark-btn" onclick="toggleDark()" title="Modo oscuro/claro">🌙</button>
+      <button class="tb-btn" onclick="openModal('credits-modal')" title="Créditos">☕</button>
+      <button class="tb-btn" onclick="openModal('settings-modal')" title="Ajustes">⚙️</button>
+      <button class="tb-btn legal-link" onclick="openModal('legal-modal')" title="Legal">🔒 Legal</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <!-- Hero renders here -->
+    <div id="hero-wrap"></div>
+    <!-- Rows render here -->
+    <div id="rows-wrap" style="padding:0 0 40px"></div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── PLAYER OVERLAY ── -->
+<div id="player-overlay">
+  <div class="player-topbar">
+    <div>
+      <div class="player-title" id="player-title">—</div>
+      <div class="player-meta" id="player-meta">—</div>
+    </div>
+    <div class="player-actions">
+      <button class="player-btn" onclick="openCurrentExt()" title="Abrir en YouTube">↗️ Abrir en Web</button>
+      <button class="player-btn close-btn" onclick="closePlayer()" title="Cerrar">✕ Cerrar</button>
+    </div>
+  </div>
+  <div class="player-frame" id="player-frame"></div>
+</div>
+
+<!-- ── CONCIERGE FAB ── -->
+<button id="concierge-fab" onclick="toggleConcierge()" title="Media Concierge IA">🤖</button>
+<div id="concierge-panel">
+  <div class="conc-head">
+    <div class="conc-head-info">
+      <div class="conc-avatar">🎬</div>
+      <div>
+        <div class="conc-name">MEDIA CONCIERGE</div>
+        <div class="conc-status">● IA Activa · Groq/Gemini</div>
+      </div>
+    </div>
+    <button class="conc-close" onclick="toggleConcierge()">✕</button>
+  </div>
+  <div class="conc-msgs" id="conc-msgs"></div>
+  <div class="conc-suggestions" id="conc-sugg-row"></div>
+  <div class="conc-inp-row">
+    <textarea class="conc-inp" id="conc-inp" placeholder="Busca contenido, pide recomendaciones..." rows="1" onkeydown="concKey(event)"></textarea>
+    <button class="conc-send" onclick="sendConc()">→</button>
+  </div>
+</div>
+
+<!-- ── PWA BANNER ── -->
+<div id="pwa-banner">
+  <div class="pwa-title">📲 Instalar DuviStream</div>
+  <div class="pwa-sub">Instala como app y disfruta de tu biblioteca offline y sin distracciones.</div>
+  <div class="pwa-btns">
+    <button class="pwa-install" onclick="installPWA()">Instalar App</button>
+    <button class="pwa-dismiss" onclick="document.getElementById('pwa-banner').style.display='none'">Ahora no</button>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+
+<!-- CREDITS -->
+<div class="modal-overlay" id="credits-modal">
+<div class="modal" style="max-width:460px">
+  <div class="modal-head">
+    <div class="modal-title">DUVI STREAM OS</div>
+    <button class="modal-close" onclick="closeModal('credits-modal')">✕</button>
+  </div>
+  <div class="modal-body" style="text-align:center">
+    <div style="font-family:var(--fm);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Desarrollado por</div>
+    <div class="credits-author">Jaime Andrés Dueñas Vicuña</div>
+    <div style="margin:10px 0 14px">
+      <a href="https://www.linkedin.com/in/jaime-andrés-dueñas-vicuña" target="_blank" class="credits-linkedin">🔗 LinkedIn · Jaime Dueñas</a>
+    </div>
+    <div class="credits-ai-badge">✅ Gemini · Groq · Multi-API</div>
+    <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;
+      color:var(--text3);padding:6px 12px;background:rgba(255,255,255,.04);
+      border:1px solid var(--border);border-radius:8px;margin-bottom:16px;display:inline-block">
+      Pack Duvi v3.4 · Agentic OS Core
+    </div>
+    <div style="height:1px;background:var(--border);margin:14px 0"></div>
+    <div id="credits-strip-modal"></div>
+    <p style="font-size:.78rem;color:var(--text2);font-style:italic;margin-bottom:14px;line-height:1.5">
+      «Si DuviStream te ayuda a disfrutar mejor tu contenido, invítame a un café ☕»
+    </p>
+    <a href="https://www.paypal.com/paypalme/proyectosduvi" target="_blank" class="coffee-btn">☕ DONAR VÍA PAYPAL</a>
+    <button class="sidebar-action" style="width:100%;justify-content:center" onclick="downloadOffline()">⬇️ Descargar App Offline</button>
+    <div style="height:1px;background:var(--border);margin:14px 0"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="legal-link" onclick="closeModal('credits-modal');openModal('legal-modal')">🔒 Aviso Legal</button>
+      <button class="legal-link" onclick="closeModal('credits-modal');openModal('legal-modal')">🛡️ Privacidad</button>
+      <button class="legal-link" onclick="closeModal('credits-modal');openModal('legal-modal')">📋 Términos</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="modal-overlay" id="settings-modal">
+<div class="modal wide">
+  <div class="modal-head">
+    <div class="modal-title">⚙️ AJUSTES OS</div>
+    <button class="modal-close" onclick="closeModal('settings-modal')">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="stab-row">
+      <button class="stab on" onclick="setStab(this,'stab-general')">🎨 General</button>
+      <button class="stab" onclick="setStab(this,'stab-api')">🔑 API & IA</button>
+      <button class="stab" onclick="setStab(this,'stab-sound')">🔊 Audio</button>
+      <button class="stab" onclick="setStab(this,'stab-system')">⚙️ Sistema</button>
+      <button class="stab" onclick="setStab(this,'stab-legal')">🔒 Legal</button>
+    </div>
+
+    <!-- General -->
+    <div id="stab-general">
+      <div class="settings-section">
+        <span class="settings-label">Tema de la interfaz</span>
+        <div class="theme-grid">
+          <div class="theme-item on" onclick="setTheme('netflix-red',this)"><div class="theme-dot" style="background:#e50914"></div><span class="theme-name">Netflix Red</span></div>
+          <div class="theme-item" onclick="setTheme('prime-blue',this)"><div class="theme-dot" style="background:#00bfff"></div><span class="theme-name">Prime Blue</span></div>
+          <div class="theme-item" onclick="setTheme('hbo-purple',this)"><div class="theme-dot" style="background:#8b5cf6"></div><span class="theme-name">HBO Purple</span></div>
+          <div class="theme-item" onclick="setTheme('spotify-green',this)"><div class="theme-dot" style="background:#1db954"></div><span class="theme-name">Spotify Green</span></div>
+          <div class="theme-item" onclick="setTheme('cinema-white',this)"><div class="theme-dot" style="background:#e0e0e0;border:1px solid #ccc"></div><span class="theme-name">Cinema White</span></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="toggle-row">
+          <span class="toggle-label">Modo oscuro</span>
+          <button class="toggle on" id="dark-toggle" onclick="toggleDark()"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Ticker de noticias</span>
+          <button class="toggle on" id="ticker-toggle" onclick="toggleTicker()"></button>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Efectos de sonido</span>
+          <button class="toggle on" id="sound-toggle" onclick="toggleSounds()"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- API -->
+    <div id="stab-api" style="display:none">
+      <div class="settings-section">
+        <span class="settings-label">🔑 Detector de API Keys</span>
+        <div class="api-detector" id="settings-api-box">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:.62rem;letter-spacing:1px;text-transform:uppercase">
+              <div class="api-dot off" id="settings-api-dot"></div>
+              <span id="settings-api-txt">Sin API Key — modo sin IA activo</span>
+            </div>
+            <div style="font-family:var(--fm);font-size:.52rem;color:var(--text3);margin-top:3px">Con Groq obtienes respuestas más rápidas</div>
+          </div>
+          <div class="api-row">
+            <select class="api-sel" id="api-provider">
+              <option value="groq">Groq (llama3)</option>
+              <option value="gemini">Gemini Flash</option>
+            </select>
+            <input type="password" class="api-inp" id="api-key-inp" placeholder="API Key...">
+            <button class="api-save" onclick="saveApiKey()">💾 Guardar</button>
+          </div>
+        </div>
+        <div style="font-family:var(--fm);font-size:.6rem;color:var(--text3);line-height:2;margin-top:8px">
+          Groq: <a href="https://console.groq.com" target="_blank" style="color:var(--accent)">console.groq.com</a> (gratis) ·
+          Gemini: <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a>
+        </div>
+      </div>
+      <div class="settings-section" id="api-keys-list">
+        <span class="settings-label">APIs Configuradas</span>
+        <div id="api-keys-status" style="font-family:var(--fm);font-size:.62rem;color:var(--text3);line-height:2">Ninguna API configurada.</div>
+      </div>
+    </div>
+
+    <!-- Sound -->
+    <div id="stab-sound" style="display:none">
+      <div class="settings-section">
+        <span class="settings-label">Pack de sonido</span>
+        <div class="sound-grid" id="sound-grid"></div>
+      </div>
+    </div>
+
+    <!-- System -->
+    <div id="stab-system" style="display:none">
+      <div class="settings-section">
+        <span class="settings-label">💾 Gestión de datos</span>
+        <div style="font-size:.82rem;color:var(--text2);margin-bottom:12px;line-height:1.6" id="sys-stats"></div>
+        <button class="form-submit" onclick="exportData()" style="margin-bottom:8px">💾 Exportar Biblioteca (.json)</button>
+        <button class="form-submit" style="background:rgba(229,9,20,.15);border:1px solid var(--border2);color:var(--accent)" onclick="document.getElementById('import-file').click()">📂 Importar Backup</button>
+        <button class="form-submit" style="background:rgba(255,255,255,.05);color:var(--text2);margin-top:8px" onclick="downloadOffline()">⬇️ App Offline</button>
+      </div>
+    </div>
+
+    <!-- Legal -->
+    <div id="stab-legal" style="display:none">
+      <div class="legal-text">
+        <div class="legal-head">📋 Términos de Uso</div>
+        <p>Duvi Stream OS es una plataforma personal de organización de videos. El uso implica aceptación de estos términos.</p>
+        <div class="legal-head">🛡️ Privacidad</div>
+        <p>Esta app <strong style="color:#22c55e">no recopila datos personales</strong>. Todo se almacena en localStorage de tu navegador. Las API keys nunca salen de tu dispositivo hacia servidores ajenos a los proveedores IA elegidos.</p>
+        <div class="legal-head">🤖 Uso de IA</div>
+        <p>Las respuestas IA dependen de Groq/Gemini. El desarrollador no se responsabiliza del contenido generado.</p>
+        <div class="legal-head">⚠️ Exención de responsabilidad</div>
+        <p>Los videos son externos (YouTube u otros). Este app no aloja contenido. El usuario es responsable de las URLs que añade.</p>
+        <div class="legal-foot">Última actualización: Marzo 2026 · Jaime Andrés Dueñas Vicuña</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ADD CONTENT -->
+<div class="modal-overlay" id="add-modal">
+<div class="modal" style="max-width:480px">
+  <div class="modal-head">
+    <div class="modal-title">➕ AÑADIR CONTENIDO</div>
+    <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="tab-row">
+      <button class="tab-btn on" onclick="setAddTab(this,'add-url')">🔗 URL</button>
+      <button class="tab-btn" onclick="setAddTab(this,'add-m3u')">📋 M3U/Lista</button>
+      <button class="tab-btn" onclick="setAddTab(this,'add-import')">📂 Importar</button>
+    </div>
+    <!-- URL Tab -->
+    <div id="add-url">
+      <div class="credits-strip">
+        <span class="coffee-link" onclick="closeModal('add-modal');openModal('credits-modal')">☕</span>
+        <span>Créditos IA:</span>
+        <div class="credits-track"><div class="credits-fill" id="add-credits-fill" style="width:100%"></div></div>
+        <span class="credits-count" id="add-credits-txt">5/5</span>
+      </div>
+      <div class="form-field">
+        <label class="form-label">URL del video (YouTube, Facebook, etc.)</label>
+        <input class="form-input" id="add-url-inp" placeholder="https://youtube.com/watch?v=..." oninput="autoThumb()">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Título</label>
+        <input class="form-input" id="add-title" placeholder="Nombre del video...">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Descripción</label>
+        <input class="form-input" id="add-desc" placeholder="Género: X. Descripción breve...">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Categoría</label>
+        <select class="form-select" id="add-cat">
+          <option>Películas</option><option>Series</option><option>Bíblico</option>
+          <option>Documentales</option><option>Reels</option><option>Cursos</option>
+          <option>Duvi Video</option><option>Pruebas</option><option>Listas</option>
+        </select>
+      </div>
+      <button class="ai-enrich-btn" onclick="aiEnrichVideo()">✦ Enriquecer con IA</button>
+      <button class="form-submit" onclick="addVideo()">✓ Añadir a Biblioteca</button>
+    </div>
+    <!-- M3U Tab -->
+    <div id="add-m3u" style="display:none">
+      <div class="form-field">
+        <label class="form-label">URL de lista M3U/W3U</label>
+        <input class="form-input" id="m3u-url" placeholder="https://example.com/lista.m3u">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Nombre de la lista</label>
+        <input class="form-input" id="m3u-name" placeholder="Mi lista de canales...">
+      </div>
+      <button class="form-submit" onclick="addPlaylist()">✓ Añadir Lista</button>
+    </div>
+    <!-- Import Tab -->
+    <div id="add-import" style="display:none">
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Importa un backup JSON previamente exportado desde DuviStream OS.</p>
+      <button class="form-submit" onclick="document.getElementById('import-file2').click()">📂 Seleccionar archivo .json</button>
+      <input type="file" id="import-file2" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- LEGAL -->
+<div class="modal-overlay" id="legal-modal">
+<div class="modal" style="max-width:560px">
+  <div class="modal-head">
+    <div class="modal-title">🔒 AVISO LEGAL & PRIVACIDAD</div>
+    <button class="modal-close" onclick="closeModal('legal-modal')">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="legal-text">
+      <div class="legal-head">📋 Términos de Uso</div>
+      <p style="margin-bottom:12px">Duvi Stream OS es una herramienta de productividad personal para organizar y reproducir videos. El uso de esta aplicación implica la aceptación de los presentes términos.</p>
+      <div class="legal-head">🛡️ Política de Privacidad</div>
+      <p style="margin-bottom:12px">Esta aplicación <strong style="color:#22c55e">no recopila ni transmite datos personales</strong>. Toda la información (biblioteca, configuración, API keys) se almacena exclusivamente en el localStorage de su navegador. Las API keys se usan únicamente para comunicarse con el proveedor IA elegido por el usuario.</p>
+      <div class="legal-head">🎬 Contenido de Terceros</div>
+      <p style="margin-bottom:12px">Duvi Stream OS no aloja contenido multimedia propio. Actúa como organizador de URLs externas. El usuario es el único responsable de las URLs que añade y del cumplimiento de los derechos de autor de dicho contenido.</p>
+      <div class="legal-head">🤖 Inteligencia Artificial</div>
+      <p style="margin-bottom:12px">El asistente de IA (Media Concierge) usa APIs de terceros (Groq, Gemini). El desarrollador no controla ni es responsable del contenido generado por estos modelos. El usuario debe verificar la exactitud de las respuestas.</p>
+      <div class="legal-head">⚠️ Limitación de Responsabilidad</div>
+      <p style="margin-bottom:12px">La aplicación se proporciona "tal cual" sin garantías. No se garantiza disponibilidad, precisión o adecuación para ningún propósito específico.</p>
+      <div class="legal-head">☕ Donaciones</div>
+      <p style="margin-bottom:12px">Las donaciones son voluntarias y no garantizan servicios adicionales. Se usan para financiar el desarrollo continuado.</p>
+      <div class="legal-foot">Última actualización: Marzo 2026 · Jaime Andrés Dueñas Vicuña · Pack Duvi v3.4</div>
+    </div>
+    <button class="form-submit" style="margin-top:14px" onclick="closeModal('legal-modal')">✓ Entendido — Cerrar</button>
+  </div>
+</div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+// ═══════════════════════════════════════
+//  DUVI STREAM OS · v3.4 · PACK DUVI
+// ═══════════════════════════════════════
+
+// ── STATE ──
+const STORAGE_KEY = 'duvi_stream_os_v34';
+
+const DEFAULT_VIDS = [
+  {id:'jose-rey-suenos',title:'José: El Rey de los Sueños',desc:'Género: Bíblico / Animación. La historia de José y su túnica de colores, su traición y su ascenso en Egipto.',url:'https://youtu.be/mF80vF1P46Q',thumb:'https://img.youtube.com/vi/mF80vF1P46Q/maxresdefault.jpg',cat:'Bíblico',pinned:true},
+  {id:'saint-seiya-12',title:'Saint Seiya: Saga de las 12 Casas',desc:'Género: Anime / Épico. Los caballeros de bronce deben atravesar las 12 casas del zodiaco.',url:'https://youtu.be/EL39xMiMoos',thumb:'https://img.youtube.com/vi/EL39xMiMoos/maxresdefault.jpg',cat:'Series'},
+  {id:'trilogia-infantil',title:'Trilogía Infantil - Clásicos de Oro',desc:'Género: Infantil. Colección de historias animadas y canciones para los más pequeños.',url:'https://youtu.be/zG6lcw3h6fs',thumb:'https://img.youtube.com/vi/zG6lcw3h6fs/maxresdefault.jpg',cat:'Películas'},
+  {id:'jesus-mesias',title:'Jesús declara que es el Mesías',desc:'Género: Bíblico. Momento histórico y espiritual donde Jesús revela su identidad.',url:'https://youtu.be/vAjZIYimbjU',thumb:'https://img.youtube.com/vi/vAjZIYimbjU/maxresdefault.jpg',cat:'Bíblico'},
+  {id:'tiempo-pantallas',title:'Control de tiempo en pantallas',desc:'Género: Documentales / Educación. Cómo gestionar el uso de dispositivos en la infancia moderna.',url:'https://youtu.be/JopcfwXB3B8',thumb:'https://img.youtube.com/vi/JopcfwXB3B8/maxresdefault.jpg',cat:'Documentales'},
+  {id:'chino-mandarin',title:'Curso Completo Chino Mandarín',desc:'Género: Cursos. Domina las bases del idioma más hablado del mundo desde cero.',url:'https://youtu.be/Qo3iO4JB1ps',thumb:'https://img.youtube.com/vi/Qo3iO4JB1ps/maxresdefault.jpg',cat:'Cursos'},
+  {id:'cantonese-sleep',title:'Aprende Cantonés mientras duermes',desc:'Género: Cursos. Método de inmersión auditiva para niveles A2 a B2.',url:'https://youtu.be/5xrWJqDH4BI',thumb:'https://img.youtube.com/vi/5xrWJqDH4BI/maxresdefault.jpg',cat:'Cursos'},
+  {id:'nature-4k',title:'Naturaleza 4K: Relajación Extrema',desc:'Género: Documentales. Un viaje visual por los paisajes más impresionantes del planeta.',url:'https://www.youtube.com/watch?v=6v2L2UGZJAM',thumb:'https://img.youtube.com/vi/6v2L2UGZJAM/maxresdefault.jpg',cat:'Documentales'}
+];
+
+const DEFAULT_FEEDS = [
+  {text:'Netflix expande su biblioteca 4K con nuevos originales',url:'https://variety.com',src:'Variety'},
+  {text:'Nuevos estrenos confirmados para esta temporada',url:'https://hollywoodreporter.com',src:'THR'},
+  {text:'La IA en streaming alcanza nuevos hitos tecnológicos',url:'https://techcrunch.com',src:'TechCrunch'},
+  {text:'Últimos acuerdos en la industria del entretenimiento',url:'https://deadline.com',src:'Deadline'},
+  {text:'Plataformas de streaming superan los 2 billones de usuarios',url:'https://variety.com',src:'Variety'}
+];
+
+function loadState(){
+  try{
+    const s=localStorage.getItem(STORAGE_KEY);
+    const base=s?JSON.parse(s):{};
+    const vids=base.videos||[];
+    DEFAULT_VIDS.forEach(d=>{if(!vids.find(v=>v.id===d.id))vids.push(d);});
+    return{
+      videos:vids,
+      folders:base.folders||[],
+      notifications:base.notifications||[],
+      config:{
+        theme:base.config?.theme||'netflix-red',
+        dark:base.config?.dark!==false,
+        ticker:base.config?.ticker!==false,
+        sounds:base.config?.sounds!==false,
+        soundPack:base.config?.soundPack||'Minimalist',
+        feeds:base.config?.feeds||DEFAULT_FEEDS,
+        ...base.config
+      }
+    };
+  }catch(e){return{videos:[...DEFAULT_VIDS],folders:[],notifications:[],config:{theme:'netflix-red',dark:true,ticker:true,sounds:true,soundPack:'Minimalist',feeds:DEFAULT_FEEDS}};}
+}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+
+let state=loadState();
+let activeCategory='Inicio';
+let searchQuery='';
+let editMode=false;
+let heroIndex=0;
+let heroTimer=null;
+let currentVideo=null;
+let concOpen=false;
+let audioCtx=null;
+let apiKeys={};
+try{const ak=localStorage.getItem('duvi_apikeys_v34');if(ak)apiKeys=JSON.parse(ak);}catch(e){}
+
+// ── THEME ──
+function applyTheme(t){
+  document.body.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-item').forEach(el=>{
+    el.classList.toggle('on',el.onclick&&el.onclick.toString().includes(t));
+  });
+  state.config.theme=t; saveState();
+}
+function setTheme(t,el){
+  document.body.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-item').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  state.config.theme=t; saveState();
+}
+applyTheme(state.config.theme);
+
+// ── DARK MODE ──
+function toggleDark(){
+  state.config.dark=!state.config.dark;
+  saveState();
+  const dt=document.getElementById('dark-toggle');
+  const db=document.getElementById('dark-btn');
+  if(dt)dt.className='toggle '+(state.config.dark?'on':'off');
+  if(db)db.textContent=state.config.dark?'🌙':'☀️';
+  playSound();
+}
+if(!state.config.dark){document.body.style.background='#f4f4f5';document.body.style.color='#18181b';}
+
+// ── SOUNDS ──
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||(window).webkitAudioContext)();}
+function playSound(){
+  if(!state.config.sounds)return;
+  try{
+    initAudio();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    const o=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    const now=audioCtx.currentTime;
+    const pack=state.config.soundPack||'Minimalist';
+    const freqs={Minimalist:880,Crystal:1500,Zen:220,'Soft Echo':440,Modern:660,Digital:440,Bubble:1200,Space:300,Velvet:550,Classic:523};
+    o.frequency.setValueAtTime(freqs[pack]||880,now);
+    if(pack==='Crystal'||pack==='Bubble')o.type='triangle';
+    if(pack==='Space'||pack==='Zen')o.type='sine';
+    g.gain.setValueAtTime(.06,now);
+    g.gain.exponentialRampToValueAtTime(.001,now+.15);
+    o.start();o.stop(now+.15);
+  }catch(e){}
+}
+function toggleSounds(){
+  state.config.sounds=!state.config.sounds;
+  const t=document.getElementById('sound-toggle');
+  if(t)t.className='toggle '+(state.config.sounds?'on':'off');
+  saveState();
+}
+
+// ── TICKER ──
+function toggleTicker(){
+  state.config.ticker=!state.config.ticker;
+  const t=document.getElementById('ticker-toggle');
+  if(t)t.className='toggle '+(state.config.ticker?'on':'off');
+  renderTicker();
+  saveState();
+}
+function renderTicker(){
+  const el=document.getElementById('ticker');
+  const scroll=document.getElementById('ticker-scroll');
+  if(!el||!scroll)return;
+  if(!state.config.ticker||!state.config.feeds.length){el.style.display='none';return;}
+  el.style.display='flex';
+  const feeds=[...state.config.feeds,...state.config.feeds];
+  scroll.innerHTML=feeds.map(f=>`<a class="ticker-item" href="${f.url}" target="_blank" rel="noopener"><span class="ticker-source">[${f.src||'DUVI'}]</span>${f.text}</a>`).join('');
+}
+renderTicker();
+
+// ── CREDITS ──
+function getCredits(){
+  const today=new Date().toDateString();
+  if(localStorage.getItem('duvi_quota_date')!==today){
+    localStorage.setItem('duvi_quota_date',today);
+    localStorage.setItem('duvi_quota','5');
+    return 5;
+  }
+  return parseInt(localStorage.getItem('duvi_quota')||'5');
+}
+function useCredit(){
+  const c=getCredits();
+  if(c<=0)return false;
+  localStorage.setItem('duvi_quota',String(c-1));
+  updateCreditsUI();
+  return true;
+}
+function updateCreditsUI(){
+  const c=getCredits();
+  ['add-credits-fill','conc-credits-fill'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.width=(c/5*100)+'%';
+  });
+  ['add-credits-txt','conc-credits-txt'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=c+'/5';
+  });
+  // Credits in modal
+  const cm=document.getElementById('credits-strip-modal');
+  if(cm)cm.innerHTML=`<div class="credits-strip" style="margin-bottom:14px"><span class="coffee-link">☕</span><span>Créditos hoy:</span><div class="credits-track"><div class="credits-fill" style="width:${c/5*100}%"></div></div><span class="credits-count">${c}/5</span></div>`;
+}
+updateCreditsUI();
+
+// ── API ──
+function saveApiKey(){
+  const prov=document.getElementById('api-provider')?.value;
+  const key=document.getElementById('api-key-inp')?.value.trim();
+  if(!key||!prov)return;
+  apiKeys[prov]=key;
+  localStorage.setItem('duvi_apikeys_v34',JSON.stringify(apiKeys));
+  document.getElementById('api-key-inp').value='';
+  updateApiUI();
+  ntf('🔑 API '+prov.toUpperCase()+' guardada');
+  playSound();
+}
+function updateApiUI(){
+  const dot=document.getElementById('settings-api-dot');
+  const txt=document.getElementById('settings-api-txt');
+  const status=document.getElementById('api-keys-status');
+  const hasKey=Object.keys(apiKeys).length>0;
+  if(dot)dot.className='api-dot '+(hasKey?'':'off');
+  if(txt)txt.textContent=hasKey?Object.keys(apiKeys).join(', ').toUpperCase()+' · Conectada ✓':'Sin API Key — modo sin IA activo';
+  if(status)status.innerHTML=hasKey?Object.keys(apiKeys).map(k=>`<div style="color:#22c55e">✅ ${k.toUpperCase()} · Configurada</div>`).join(''):'Ninguna API configurada.';
+}
+updateApiUI();
+
+// ── AI CALLS ──
+const CONC_SYS=`Eres Media Concierge de Duvi Stream OS. Responde SOLO en JSON:
+{"message":"texto amigable","suggestions":["s1","s2","s3","s4"],
+"videos":[{"title":"","desc":"Género: X. Y","url":"https://youtube.com/...","cat":"Películas|Series|Documentales|Cursos|Bíblico|Reels","thumb":""}]}
+Si el usuario pide contenido, sugiere 2-3 videos reales de YouTube con URLs válidas.`;
+
+async function callGroq(prompt,sys){
+  const key=apiKeys['groq'];
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama3-70b-8192',messages:[{role:'system',content:sys},{role:'user',content:prompt}],max_tokens:900,temperature:.3})
+  });
+  const d=await r.json();
+  return d.choices[0].message.content;
+}
+async function callGemini(prompt,sys){
+  const key=apiKeys['gemini'];
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:sys+'\n\n'+prompt}]}]})
+  });
+  const d=await r.json();
+  return d.candidates[0].content.parts[0].text;
+}
+async function callAI(prompt,sys){
+  const prov=Object.keys(apiKeys)[0];
+  if(!prov)throw new Error('No API key');
+  if(prov==='groq')return callGroq(prompt,sys);
+  return callGemini(prompt,sys);
+}
+function safeJSON(text){
+  try{return JSON.parse(text);}catch(e){
+    const m=text.match(/\{[\s\S]*\}/);
+    if(m)try{return JSON.parse(m[0]);}catch(e2){}
+    return {message:text,suggestions:[],videos:[]};
+  }
+}
+
+// ── HERO ──
+function getCategoryVideos(cat){
+  if(cat==='Favoritos')return state.videos.filter(v=>v.fav);
+  if(cat==='Historial')return [...state.videos].filter(v=>v.lastWatched).sort((a,b)=>b.lastWatched-a.lastWatched).slice(0,20);
+  return state.videos.filter(v=>v.cat===cat);
+}
+function getHeroVideos(){
+  return state.videos.filter(v=>v.pinned||v.fav).slice(0,6).concat(state.videos.slice(0,6)).slice(0,6).filter((v,i,a)=>a.findIndex(x=>x.id===v.id)===i);
+}
+function renderHero(vids){
+  const wrap=document.getElementById('hero-wrap');
+  if(!vids.length||activeCategory!=='Inicio'||searchQuery){wrap.innerHTML='';return;}
+  const v=vids[heroIndex]||vids[0];
+  wrap.innerHTML=`<div id="hero">
+    <div class="hero-bg"><img src="${v.thumb||'https://picsum.photos/1200/600'}" alt="${v.title}" onerror="this.src='https://picsum.photos/seed/${v.id}/1200/600'"></div>
+    <div class="hero-grad"></div>
+    <div class="hero-content">
+      <div class="hero-badge">● Destacado · ${v.cat}</div>
+      <div class="hero-title">${v.title}</div>
+      <div class="hero-desc">${v.desc||''}</div>
+      <div class="hero-btns">
+        <button class="hero-play" onclick="playVideo('${v.id}')">▶ REPRODUCIR</button>
+      </div>
+    </div>
+    <div class="hero-dots">${vids.map((_,i)=>`<div class="hero-dot ${i===heroIndex?'on':''}" onclick="gotoHero(${i})"></div>`).join('')}</div>
+    <div class="hero-arrows">
+      <button class="hero-arrow" onclick="prevHero()">‹</button>
+      <button class="hero-arrow" onclick="nextHero()">›</button>
+    </div>
+    <div class="hero-progress"><div class="hero-progress-bar" id="hero-pb" style="width:${((heroIndex+1)/vids.length*100)}%"></div></div>
+  </div>`;
+}
+let heroVids=[];
+function nextHero(){heroIndex=(heroIndex+1)%heroVids.length;renderHero(heroVids);}
+function prevHero(){heroIndex=(heroIndex-1+heroVids.length)%heroVids.length;renderHero(heroVids);}
+function gotoHero(i){heroIndex=i;renderHero(heroVids);}
+function startHeroTimer(){
+  clearInterval(heroTimer);
+  heroTimer=setInterval(()=>{if(heroVids.length>1)nextHero();},8000);
+}
+
+// ── VIDEO ROWS ──
+function extractYTId(url){
+  if(!url)return'';
+  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^&\n?#]+)/);
+  return m?m[1]:'';
+}
+function getThumb(v){
+  if(v.thumb)return v.thumb;
+  const ytid=extractYTId(v.url);
+  return ytid?`https://img.youtube.com/vi/${ytid}/maxresdefault.jpg`:`https://picsum.photos/seed/${v.id}/400/225`;
+}
+function renderRows(){
+  const wrap=document.getElementById('rows-wrap');
+  if(!wrap)return;
+  const cats=['Películas','Series','Bíblico','Documentales','Reels','Cursos','Favoritos','Historial','Duvi Video','Pruebas','Listas'];
+  const q=searchQuery.toLowerCase();
+
+  if(activeCategory==='Notificaciones'){
+    wrap.innerHTML=renderNotifPage();return;
+  }
+  if(activeCategory==='Inicio'&&!q){
+    // All cats with content
+    wrap.innerHTML='<div style="padding:0 24px">'+cats.filter(c=>getCategoryVideos(c).filter(v=>matchSearch(v,q)).length>0)
+      .map(c=>renderRow(c,getCategoryVideos(c).filter(v=>matchSearch(v,q)))).join('')+'</div>';
+  } else {
+    const vids=(activeCategory==='Inicio'?state.videos:getCategoryVideos(activeCategory)).filter(v=>matchSearch(v,q));
+    wrap.innerHTML='<div style="padding:0 24px">'+renderRow(activeCategory==='Inicio'?'Resultados':activeCategory,vids)+'</div>';
+  }
+}
+function matchSearch(v,q){
+  if(!q)return true;
+  return v.title.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q)||v.cat.toLowerCase().includes(q);
+}
+function renderRow(cat,vids){
+  if(!vids.length)return'';
+  const folders=state.folders.filter(f=>f.cat===cat);
+  const looseVids=vids.filter(v=>!v.folderId);
+  return`<div class="video-section">
+    <div class="section-head">
+      <div><span class="section-title">${cat}</span><span class="section-count">${vids.length} items</span></div>
+      ${editMode?`<button onclick="addFolder('${cat}')" style="font-family:var(--fm);font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3);background:none;border:1px dashed var(--border);padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">+ Carpeta</button>`:''}
+    </div>
+    <div class="scroll-row-wrap">
+      <button class="scroll-arrow left" onclick="scrollRow(this,-1)">‹</button>
+      <div class="scroll-row" id="row-${cat.replace(/\s/g,'_')}">
+        ${folders.map(f=>renderFolder(f,vids.filter(v=>v.folderId===f.id))).join('')}
+        ${looseVids.map(v=>renderCard(v)).join('')}
+      </div>
+      <button class="scroll-arrow right" onclick="scrollRow(this,1)">›</button>
+    </div>
+  </div>`;
+}
+function renderCard(v){
+  const thumb=getThumb(v);
+  return`<div class="vcard ${editMode?'edit-mode':''}" id="vc-${v.id}" draggable="${editMode}" 
+    ondragstart="dragStart(event,'${v.id}')" ondragend="dragEnd(event)"
+    title="${v.title}">
+    <div class="vcard-thumb">
+      <img src="${thumb}" alt="${v.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${v.id}/400/225'">
+      <div class="vcard-overlay">
+        <button class="vcard-play" onclick="playVideo('${v.id}')">▶</button>
+      </div>
+      ${v.pinned?'<div class="vcard-pinned">Destacado</div>':''}
+      <button class="vcard-fav ${v.fav?'on':''}" onclick="toggleFav('${v.id}',event)" title="Favorito">${v.fav?'❤️':'🤍'}</button>
+    </div>
+    <div class="vcard-info">
+      <div class="vcard-title">${v.title}</div>
+      <div class="vcard-cat">${v.cat}</div>
+    </div>
+    <div class="vcard-actions">
+      <button class="vcard-action-btn" onclick="playVideo('${v.id}')">▶ Play</button>
+      ${editMode?`<button class="vcard-action-btn" onclick="deleteVideo('${v.id}',event)">🗑</button>`:''}
+      <button class="vcard-action-btn" onclick="toggleFav('${v.id}',event)">${v.fav?'♥':'♡'}</button>
+    </div>
+  </div>`;
+}
+function renderFolder(f,vids){
+  const count=vids.length;
+  return`<div class="folder-card" id="folder-${f.id}"
+    ondragover="event.preventDefault();this.classList.add('drop-target')"
+    ondragleave="this.classList.remove('drop-target')"
+    ondrop="dropOnFolder(event,'${f.id}')"
+    onclick="openFolder('${f.id}')">
+    <div class="folder-icon" style="background:${f.color||'var(--accent)'}22"><span style="font-size:1.8rem">📁</span></div>
+    <div class="folder-name">${f.name}</div>
+    <div class="folder-count">${count} videos</div>
+  </div>`;
+}
+function renderNotifPage(){
+  const notifs=state.notifications;
+  return`<div style="max-width:800px;margin:0 auto;padding:32px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-family:var(--fn);font-size:2rem;letter-spacing:.03em">🔔 NOTIFICACIONES</div>
+      ${notifs.length?`<button onclick="clearNotifs()" style="font-family:var(--fm);font-size:.58rem;letter-spacing:1px;text-transform:uppercase;background:rgba(229,9,20,.1);border:1px solid var(--border2);color:var(--accent);padding:7px 14px;border-radius:8px;cursor:pointer">🗑 Limpiar todo</button>`:''}
+    </div>
+    ${notifs.length?notifs.slice().reverse().map(n=>`<div class="notif-item">
+      <div style="font-size:1.2rem;flex-shrink:0">✅</div>
+      <div><div class="notif-title">${n.title}</div><div class="notif-msg">${n.message}</div><div class="notif-time">${new Date(n.time).toLocaleString()}</div></div>
+    </div>`).join(''):
+    '<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-text">No hay notificaciones</div></div>'}
+  </div>`;
+}
+
+// ── SIDEBAR / CATEGORY ──
+function setCategory(cat){
+  activeCategory=cat;
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active',el.textContent.trim().startsWith(cat));
+  });
+  heroVids=getHeroVideos();
+  renderHero(heroVids);
+  renderRows();
+  playSound();
+}
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const btn=document.getElementById('sidebar-toggle');
+  sb.classList.toggle('collapsed');
+  btn.textContent=sb.classList.contains('collapsed')?'›':'‹';
+  playSound();
+}
+
+// ── SEARCH ──
+function handleSearch(){
+  searchQuery=document.getElementById('search-inp').value;
+  if(searchQuery&&activeCategory==='Inicio'){
+    const heroWrap=document.getElementById('hero-wrap');
+    if(heroWrap)heroWrap.innerHTML='';
+  } else if(!searchQuery){
+    heroVids=getHeroVideos();
+    renderHero(heroVids);
+  }
+  renderRows();
+}
+
+// ── EDIT MODE ──
+function toggleEdit(){
+  editMode=!editMode;
+  const btn=document.getElementById('edit-btn');
+  btn.classList.toggle('on',editMode);
+  btn.textContent=editMode?'✏️ Edición ON':'✏️ Editar';
+  renderRows();
+  playSound();
+  if(editMode)ntf('✏️ Modo edición activado — arrastra videos a carpetas');
+}
+
+// ── PLAYER ──
+function getEmbedUrl(url){
+  const ytid=extractYTId(url);
+  if(ytid)return`https://www.youtube-nocookie.com/embed/${ytid}?autoplay=1&modestbranding=1&rel=0`;
+  if(url.includes('facebook.com')){
+    const enc=encodeURIComponent(url);
+    return`https://www.facebook.com/plugins/video.php?href=${enc}&autoplay=1&allowfullscreen=true`;
+  }
+  return url;
+}
+function playVideo(id){
+  const v=state.videos.find(v=>v.id===id);
+  if(!v)return;
+  currentVideo=v;
+  v.lastWatched=Date.now();
+  saveState();
+  document.getElementById('player-title').textContent=v.title;
+  document.getElementById('player-meta').textContent='Categoría: '+v.cat;
+  const frame=document.getElementById('player-frame');
+  const embedUrl=getEmbedUrl(v.url);
+  frame.innerHTML=`<iframe src="${embedUrl}" allow="autoplay;fullscreen;encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>`;
+  document.getElementById('player-overlay').classList.add('on');
+  playSound();
+  // add to history notification
+  addNotif('▶️ Reproduciendo','Iniciaste: '+v.title);
+}
+function closePlayer(){
+  document.getElementById('player-overlay').classList.remove('on');
+  document.getElementById('player-frame').innerHTML='';
+  currentVideo=null;
+  playSound();
+}
+function openCurrentExt(){
+  if(currentVideo)window.open(currentVideo.url,'_blank');
+}
+
+// ── VIDEO ACTIONS ──
+function toggleFav(id,e){
+  if(e)e.stopPropagation();
+  const v=state.videos.find(v=>v.id===id);
+  if(!v)return;
+  v.fav=!v.fav;
+  saveState();
+  renderRows();
+  if(v.fav)addNotif('❤️ Favorito añadido',v.title+' añadido a Favoritos');
+  playSound();
+}
+function deleteVideo(id,e){
+  if(e)e.stopPropagation();
+  if(!confirm('¿Eliminar este video de la biblioteca?'))return;
+  state.videos=state.videos.filter(v=>v.id!==id);
+  saveState();
+  renderRows();
+  playSound();
+}
+
+// ── FOLDERS ──
+let dragVideoId=null;
+function dragStart(e,id){dragVideoId=id;e.dataTransfer.effectAllowed='move';}
+function dragEnd(e){dragVideoId=null;}
+function dropOnFolder(e,folderId){
+  e.preventDefault();
+  const el=document.getElementById('folder-'+folderId);
+  if(el)el.classList.remove('drop-target');
+  if(!dragVideoId)return;
+  const v=state.videos.find(v=>v.id===dragVideoId);
+  if(v){v.folderId=folderId;saveState();renderRows();ntf('📁 Video movido a carpeta');playSound();}
+}
+function addFolder(cat){
+  const name=prompt('Nombre de la carpeta:');
+  if(!name)return;
+  const colors=['#e50914','#00bfff','#1db954','#f59e0b','#8b5cf6'];
+  const color=colors[Math.floor(Math.random()*colors.length)];
+  const folder={id:Date.now().toString(36),name,cat,color};
+  state.folders.push(folder);
+  saveState();
+  renderRows();
+  playSound();
+  ntf('📁 Carpeta "'+name+'" creada');
+}
+function openFolder(fid){
+  // For simplicity, filter to show folder videos inline
+  const folder=state.folders.find(f=>f.id===fid);
+  if(!folder)return;
+  const vids=state.videos.filter(v=>v.folderId===fid);
+  const wrap=document.getElementById('rows-wrap');
+  wrap.innerHTML=`<div style="padding:24px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <button onclick="renderRows()" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">← Volver</button>
+      <div style="font-family:var(--fn);font-size:1.8rem;letter-spacing:.03em">📁 ${folder.name}</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px">
+      ${vids.length?vids.map(v=>renderCard(v)).join(''):'<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">Carpeta vacía — arrastra videos aquí</div></div>'}
+    </div>
+  </div>`;
+}
+
+// ── ADD VIDEO ──
+function autoThumb(){
+  const url=document.getElementById('add-url-inp')?.value;
+  if(!url)return;
+  const ytid=extractYTId(url);
+  if(ytid&&!document.getElementById('add-title').value){
+    // Auto-fill title hint
+    document.getElementById('add-title').placeholder='Cargando título... (usa IA para enriquecer)';
+  }
+}
+async function aiEnrichVideo(){
+  if(!useCredit()){ntf('☕ Créditos agotados — dona un café');openModal('credits-modal');return;}
+  const url=document.getElementById('add-url-inp')?.value;
+  if(!url){ntf('⚠️ Ingresa una URL primero');return;}
+  const btn=document.querySelector('.ai-enrich-btn');
+  if(btn)btn.textContent='⏳ Enriqueciendo...';
+  try{
+    const sys='Devuelve SOLO JSON: {"title":"","description":"Género: X. Descripción breve.","category":"Películas|Series|Bíblico|Documentales|Reels|Cursos"}';
+    const text=await callAI('Analiza esta URL y devuelve título, descripción y categoría: '+url, sys);
+    const data=safeJSON(text);
+    if(data.title)document.getElementById('add-title').value=data.title;
+    if(data.description)document.getElementById('add-desc').value=data.description;
+    if(data.category){const sel=document.getElementById('add-cat');if(sel)[...sel.options].forEach(o=>{if(o.value===data.category)o.selected=true;});}
+    ntf('✦ Video enriquecido con IA');
+  }catch(e){ntf('⚠️ IA no disponible — completa manualmente');}
+  if(btn)btn.textContent='✦ Enriquecer con IA';
+}
+function addVideo(){
+  const url=document.getElementById('add-url-inp')?.value.trim();
+  const title=document.getElementById('add-title')?.value.trim()||'Video sin título';
+  const desc=document.getElementById('add-desc')?.value.trim()||'';
+  const cat=document.getElementById('add-cat')?.value||'Películas';
+  if(!url){ntf('⚠️ URL requerida');return;}
+  const ytid=extractYTId(url);
+  const thumb=ytid?`https://img.youtube.com/vi/${ytid}/maxresdefault.jpg`:'';
+  const video={id:Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6),title,desc,url,thumb,cat,fav:false};
+  state.videos.unshift(video);
+  saveState();
+  closeModal('add-modal');
+  heroVids=getHeroVideos();
+  renderHero(heroVids);
+  renderRows();
+  addNotif('✅ Video añadido',title+' añadido a '+cat);
+  ntf('✅ "'+title+'" añadido');
+  playSound();
+  // Reset form
+  ['add-url-inp','add-title','add-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function addPlaylist(){
+  const url=document.getElementById('m3u-url')?.value.trim();
+  const name=document.getElementById('m3u-name')?.value.trim()||'Lista M3U';
+  if(!url){ntf('⚠️ URL de lista requerida');return;}
+  const video={id:Date.now().toString(36),title:name,desc:'Lista M3U: '+name,url,
+    thumb:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=400',cat:'Listas'};
+  state.videos.unshift(video);
+  saveState();
+  closeModal('add-modal');
+  renderRows();
+  ntf('📋 Lista "'+name+'" añadida');
+  playSound();
+}
+
+// ── NOTIFICATIONS ──
+function addNotif(title,message){
+  state.notifications.unshift({id:Date.now().toString(),title,message,time:Date.now()});
+  if(state.notifications.length>50)state.notifications=state.notifications.slice(0,50);
+  saveState();
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.style.display='';badge.textContent=state.notifications.length;}
+}
+function clearNotifs(){
+  state.notifications=[];
+  saveState();
+  const badge=document.getElementById('notif-badge');
+  if(badge)badge.style.display='none';
+  renderRows();
+}
+
+// ── CONCIERGE ──
+function toggleConcierge(){
+  concOpen=!concOpen;
+  const panel=document.getElementById('concierge-panel');
+  const fab=document.getElementById('concierge-fab');
+  panel.classList.toggle('on',concOpen);
+  fab.classList.toggle('open',concOpen);
+  fab.textContent=concOpen?'✕':'🤖';
+  if(concOpen&&document.getElementById('conc-msgs').children.length===0){
+    addConcMsg('bot','¡Hola! Soy tu Media Concierge 🎬\nPuedo buscar videos, recomendar contenido y organizar tu biblioteca. ¿Qué quieres ver hoy?',[
+      'Películas de acción épicas','Documentales de naturaleza','Cursos de idiomas','Series de anime clásico'
+    ]);
+  }
+  playSound();
+}
+function addConcMsg(role,text,suggestions,videos){
+  const msgs=document.getElementById('conc-msgs');
+  const div=document.createElement('div');
+  div.className='conc-msg '+role;
+  div.textContent=text;
+  msgs.appendChild(div);
+  // Videos
+  if(videos&&videos.length){
+    videos.forEach(v=>{
+      const vd=document.createElement('div');
+      vd.className='conc-video-result';
+      const thumb=v.thumb||`https://img.youtube.com/vi/${extractYTId(v.url)}/maxresdefault.jpg`;
+      vd.innerHTML=`<img class="conc-video-thumb" src="${thumb}" onerror="this.src='https://picsum.photos/seed/${Math.random()}/100/60'" alt="">
+        <div class="conc-video-info"><div class="conc-video-title">${v.title}</div><div class="conc-video-cat">${v.cat||'—'}</div></div>
+        <button class="conc-add-btn" onclick="addFromConc(this,'${btoa(encodeURIComponent(JSON.stringify(v)))}')">+ Añadir</button>`;
+      msgs.appendChild(vd);
+    });
+  }
+  // Suggestions
+  const suggRow=document.getElementById('conc-sugg-row');
+  if(suggRow)suggRow.innerHTML='';
+  if(suggestions&&suggestions.length&&suggRow){
+    suggestions.forEach(s=>{
+      const btn=document.createElement('button');
+      btn.className='conc-sugg';
+      btn.textContent=s;
+      btn.onclick=()=>sendConc(s);
+      suggRow.appendChild(btn);
+    });
+  }
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function addFromConc(btn,data){
+  try{
+    const v=JSON.parse(decodeURIComponent(atob(data)));
+    const ytid=extractYTId(v.url);
+    const video={id:Date.now().toString(36),title:v.title,desc:v.desc||v.description||'',url:v.url,
+      thumb:v.thumb||(ytid?`https://img.youtube.com/vi/${ytid}/maxresdefault.jpg`:''),cat:v.cat||'Películas'};
+    state.videos.unshift(video);
+    saveState();
+    renderRows();
+    btn.textContent='✓ Añadido';
+    btn.style.background='#22c55e';
+    btn.disabled=true;
+    addNotif('📺 Video añadido',video.title+' desde Media Concierge');
+    ntf('✅ "'+video.title+'" añadido');
+    playSound();
+  }catch(e){ntf('⚠️ Error al añadir video');}
+}
+function concKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendConc();}}
+async function sendConc(customText){
+  const inp=document.getElementById('conc-inp');
+  const q=customText||inp.value.trim();
+  if(!q)return;
+  if(!customText)inp.value='';
+  document.getElementById('conc-sugg-row').innerHTML='';
+  addConcMsg('user',q);
+  const hasProv=Object.keys(apiKeys).length>0;
+  if(!hasProv){
+    addConcMsg('bot','Para usar el Media Concierge con IA, configura una API key en ⚙️ Ajustes → API & IA.\n\nMientras tanto puedes añadir contenido manualmente con el botón + Añadir.',[
+      'Ir a Ajustes','Añadir video manualmente','Ver biblioteca','Explorar categorías'
+    ]);
+    return;
+  }
+  addConcMsg('sys','Consultando IA...');
+  try{
+    const text=await callAI(q,CONC_SYS);
+    const data=safeJSON(text);
+    const msgs=document.getElementById('conc-msgs');
+    const last=msgs.lastElementChild;
+    if(last&&last.classList.contains('sys'))last.remove();
+    addConcMsg('bot',data.message||'Aquí tienes mis sugerencias:',data.suggestions||[],data.videos||[]);
+    if(data.videos&&data.videos.length){
+      addNotif('🤖 Concierge','Encontró '+data.videos.length+' videos para: '+q);
+    }
+  }catch(e){
+    const msgs=document.getElementById('conc-msgs');
+    const last=msgs.lastElementChild;
+    if(last&&last.classList.contains('sys'))last.remove();
+    addConcMsg('bot','⚠️ Error de IA. Verifica tu API key en Ajustes.\n'+e.message);
+  }
+}
+
+// ── ADD MODAL TABS ──
+function setAddTab(btn,id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ['add-url','add-m3u','add-import'].forEach(tid=>{
+    const el=document.getElementById(tid);
+    if(el)el.style.display=tid===id?'block':'none';
+  });
+}
+
+// ── SETTINGS TABS ──
+function setStab(btn,id){
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ['stab-general','stab-api','stab-sound','stab-system','stab-legal'].forEach(sid=>{
+    const el=document.getElementById(sid);
+    if(el)el.style.display=sid===id?'block':'none';
+  });
+  if(id==='stab-sound')renderSoundGrid();
+  if(id==='stab-system')renderSysStats();
+  if(id==='stab-api')updateApiUI();
+}
+function renderSoundGrid(){
+  const packs=['Minimalist','Crystal','Soft Echo','Zen','Modern','Digital','Bubble','Space','Velvet','Classic'];
+  const grid=document.getElementById('sound-grid');
+  if(!grid)return;
+  grid.innerHTML=packs.map(p=>`<button class="sound-btn ${p===state.config.soundPack?'on':''}" onclick="setSoundPack('${p}',this)">${p}</button>`).join('');
+}
+function setSoundPack(pack,btn){
+  state.config.soundPack=pack;
+  saveState();
+  document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  playSound();
+}
+function renderSysStats(){
+  const stats=document.getElementById('sys-stats');
+  if(!stats)return;
+  const size=new Blob([JSON.stringify(state)]).size;
+  stats.innerHTML=`📺 Videos: <strong>${state.videos.length}</strong><br>
+    📁 Carpetas: <strong>${state.folders.length}</strong><br>
+    🔔 Notificaciones: <strong>${state.notifications.length}</strong><br>
+    💾 Datos: <strong>${(size/1024).toFixed(1)} KB</strong><br>
+    🔑 APIs: <strong>${Object.keys(apiKeys).length}</strong>`;
+}
+
+// ── MODALS ──
+function openModal(id){
+  document.getElementById(id)?.classList.add('on');
+  if(id==='credits-modal')updateCreditsUI();
+  if(id==='settings-modal'){renderSoundGrid();updateApiUI();}
+  playSound();
+}
+function closeModal(id){document.getElementById(id)?.classList.remove('on');playSound();}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on');});
+});
+
+// ── SCROLL ARROWS ──
+function scrollRow(btn,dir){
+  const row=btn.parentElement.querySelector('.scroll-row');
+  if(row)row.scrollBy({left:dir*300,behavior:'smooth'});
+}
+
+// ── DATA ──
+function exportData(){
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='duvi_stream_backup_'+Date.now()+'.json';a.click();
+  URL.revokeObjectURL(url);
+  ntf('💾 Biblioteca exportada');
+  playSound();
+}
+function importData(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.videos){
+        state=data;
+        saveState();
+        location.reload();
+      }else{ntf('⚠️ Archivo no válido');}
+    }catch(ex){ntf('⚠️ Error al importar');}
+  };
+  reader.readAsText(file);
+}
+function downloadOffline(){
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='DuviStream_v3.4_Offline.html';a.click();
+  URL.revokeObjectURL(url);
+  ntf('⬇️ App offline descargada');
+}
+
+// ── NOTIF TOAST ──
+let ntfT;
+function ntf(msg){
+  let el=document.querySelector('.notif');if(el)el.remove();
+  el=document.createElement('div');el.className='notif';el.textContent=msg;
+  document.body.appendChild(el);
+  clearTimeout(ntfT);ntfT=setTimeout(()=>el?.remove(),3000);
+}
+
+// ── PWA ──
+let dPWA;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();dPWA=e;
+  setTimeout(()=>{document.getElementById('pwa-banner').style.display='block';},3000);
+});
+function installPWA(){
+  if(dPWA){dPWA.prompt();dPWA.userChoice.then(()=>{dPWA=null;document.getElementById('pwa-banner').style.display='none';});}
+  else{ntf('📲 iOS: Safari → Compartir → Añadir a pantalla inicio');document.getElementById('pwa-banner').style.display='none';}
+}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// ── INIT ──
+(function(){
+  heroVids=getHeroVideos();
+  renderHero(heroVids);
+  renderRows();
+  startHeroTimer();
+  // Restore theme & toggles
+  document.getElementById('dark-toggle')?.classList?.add(state.config.dark?'on':'off');
+  document.getElementById('ticker-toggle')?.classList?.add(state.config.ticker?'on':'off');
+  document.getElementById('sound-toggle')?.classList?.add(state.config.sounds?'on':'off');
+  const notifCount=state.notifications.length;
+  const badge=document.getElementById('notif-badge');
+  if(badge&&notifCount){badge.style.display='';badge.textContent=notifCount;}
+  // Keyboard shortcut ESC to close player
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      if(document.getElementById('player-overlay').classList.contains('on'))closePlayer();
+      document.querySelectorAll('.modal-overlay.on').forEach(m=>m.classList.remove('on'));
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "Duvi Stream OS",
+  "short_name": "DuviStream",
+  "description": "Tu plataforma personal de video con IA — Organiza y reproduce tu biblioteca multimedia",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["entertainment", "productivity", "utilities"],
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Películas", "url": "/index.html", "description": "Ver películas" },
+    { "name": "Añadir Video", "url": "/index.html", "description": "Añadir contenido nuevo" }
+  ]
+}
