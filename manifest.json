@@ -4,7 +4,7 @@
   "description": "Tu plataforma de streaming personal con IA Agentica",
   "start_url": "/DUVI-STREAM-OS/index.html",
   "scope": "/DUVI-STREAM-OS/",
-  "display": "standalone",
+  "display": "any",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "orientation": "any",
